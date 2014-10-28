@@ -2,6 +2,7 @@ package histogram
 
 import (
 	"math"
+	"sort"
 )
 
 // Histogram holds a count of values partionned over buckets.
@@ -14,6 +15,9 @@ type Histogram struct {
 	Count int
 	// Buckets over which values are partionned.
 	Buckets []Bucket
+
+	//Mean
+	Mean float64
 }
 
 // Bucket counts a partion of values.
@@ -29,7 +33,8 @@ type Bucket struct {
 }
 
 // Hist creates an histogram partionning input over `bins` buckets.
-func Hist(bins int, input []float64) Histogram {
+// sorted - sorted output
+func Hist(bins int, input []float64, sorted bool) Histogram {
 	if len(input) == 0 || bins == 0 {
 		return Histogram{}
 	}
@@ -58,6 +63,9 @@ func Hist(bins int, input []float64) Histogram {
 		minC = imin(minC, buckets[bi].Count)
 		maxC = imax(maxC, buckets[bi].Count)
 	}
+	if sorted{
+		sort.Sort(byData(buckets))
+	}
 
 	return Histogram{
 		Min:     minC,
@@ -66,6 +74,14 @@ func Hist(bins int, input []float64) Histogram {
 		Buckets: buckets,
 	}
 }
+
+type byData []Bucket
+
+
+func (a byData) Len() int { return len(a)}
+func (a byData) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a byData) Less(i, j int) bool { return a[i].Count < a[j].Count; }
+
 
 // Scale gives the scaled count of the bucket at idx, using the
 // provided scale func.
@@ -98,4 +114,14 @@ func imax(a, b int) int {
 		return a
 	}
 	return b
+}
+
+
+//Check dividing by zero
+func mean (data []float64) float64 {
+	result := 0.0
+	for _, item := range data{
+		result += item
+	}
+	return result/float64(len(data))
 }

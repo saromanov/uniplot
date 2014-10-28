@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"text/tabwriter"
+	"io/ioutil"
 )
 
 // FormatFunc formats a float into the proper string form. Used to
@@ -72,4 +73,23 @@ func fprintf(w io.Writer, h Histogram, s ScaleFunc, f FormatFunc) error {
 	}
 
 	return tabw.Flush()
+}
+
+// Read data from file by line
+func Read(path string)[]float64{
+	data,err := ioutil.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	lines := strings.Split(string(data), "\n")
+    arr := make([]float64, 0, len(lines))
+    for _,num:= range lines {
+    	clean_num, err := strconv.ParseFloat(num,64)
+    	if err != nil{
+    		panic(err)
+    	}
+    	arr = append(arr, clean_num)
+    }
+    return arr
+
 }
